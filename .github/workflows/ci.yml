@@ -27,7 +27,7 @@ jobs:
         run: docker exec -i ogcapi cargo fmt --all -- --check
       
       - name: Clippy
-        run: docker exec -i ogcapi cargo clippy -- -D warnings
+        run: docker exec -i ogcapi cargo clippy --workspace --all-features --tests -- -D warnings
 
       - name: Test
         run: docker exec -i ogcapi cargo test --workspace --all-features

@@ -25,7 +25,6 @@ impl StacSeach for Db {
 
         if let Some(collections) = &query.collections {
             collection_ids = collections
-                .0
                 .iter()
                 .filter(|c| collection_ids.contains(c))
                 .map(|c| c.to_owned())
@@ -37,10 +36,8 @@ impl StacSeach for Db {
             .map(|collection_id| {
                 format!(
                     r#"
-                    SELECT *, '{0}' as collection
-                    FROM items."{0}"
-                    "#,
-                    collection_id
+                    SELECT * FROM items."{collection_id}"
+                    "#
                 )
             })
             .collect::<Vec<String>>()
@@ -115,7 +112,7 @@ impl StacSeach for Db {
 
         // ids
         if let Some(ids) = query.ids.as_ref() {
-            where_conditions.push(format!("id IN ('{}')", ids.0.join("','")))
+            where_conditions.push(format!("id IN ('{}')", ids.join("','")))
         }
 
         // intersects

@@ -76,6 +76,7 @@ impl State {
             "https://api.stacspec.org/v1.0.0-rc.1/item-search",
             "https://api.stacspec.org/v1.0.0-rc.1/collections",
             "https://api.stacspec.org/v1.0.0-rc.1/ogcapi-features",
+            "https://api.stacspec.org/v1.0.0-rc.1/browseable",
         ]);
 
         // drivers

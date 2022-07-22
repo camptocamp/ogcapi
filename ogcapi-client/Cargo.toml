@@ -20,5 +20,5 @@ serde_qs = "0.10.1"
 thiserror = "1.0.31"
 url = { version = "2.2.2", features = ["serde"]}
 
-ogcapi-types = "0.1.0"
-# ogcapi-types = { path = "../ogcapi-types" }
+# ogcapi-types = "0.1.0"
+ogcapi-types = { path = "../ogcapi-types" }

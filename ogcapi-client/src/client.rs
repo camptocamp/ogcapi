@@ -160,9 +160,7 @@ impl Client {
 
     #[cfg(feature = "stac")]
     pub fn search(&self, params: SearchParams) -> Result<Items, Error> {
-        let mut url = self.endpoint.to_string();
-
-        url.push_str(&format!("search?{}", serde_qs::to_string(&params)?));
+        let url = format!("{}search?{}", self.endpoint, serde_qs::to_string(&params)?);
 
         self.fetch::<FeatureCollection>(&url).map(|i| Items {
             client: self.to_owned(),
@@ -218,7 +216,7 @@ trait Pagination<T> {
 #[cfg(feature = "stac")]
 impl Pagination<StacEntity> for StacEntities {
     fn try_next(&mut self) -> Result<Option<StacEntity>, Error> {
-        while let Some(link) = self.links.pop() {
+        if let Some(link) = self.links.pop() {
             let entity = self.client.fetch::<serde_json::Value>(&link.href)?;
 
             match entity.get("type").and_then(|v| v.as_str()) {
@@ -436,13 +434,12 @@ mod tests {
     }
 
     #[test]
-    #[cfg(feature = "stac")]
     fn conformance() {
         let endpoint = "https://data.geo.admin.ch/api/stac/v0.9/";
         let client = Client::new(endpoint).unwrap();
         let conformance = client.conformance().unwrap();
         println!("{:#?}", conformance);
-        assert!(conformance.conforms_to.len() > 0);
+        assert!(!conformance.conforms_to.is_empty());
     }
 
     #[test]
@@ -462,9 +459,11 @@ mod tests {
             .unwrap()
             .collect::<Vec<Result<ogcapi_types::common::Collection, crate::Error>>>();
         for collection in &collections {
-            collection.as_ref().ok().map(|c| println!("{}", c.id));
+            if let Ok(c) = collection.as_ref() {
+                println!("{}", c.id)
+            };
         }
-        assert!(collections.len() > 0);
+        assert!(!collections.is_empty());
     }
 
     #[test]
@@ -475,7 +474,7 @@ mod tests {
         let bbox = ogcapi_types::common::Bbox::from([7.4473, 46.9479, 7.4475, 46.9481]);
         let params = ogcapi_types::stac::SearchParams::new()
             .with_bbox(bbox)
-            .with_collections(["ch.swisstopo.swissalti3d"].as_slice());
+            .with_collections(&["ch.swisstopo.swissalti3d"]);
         let mut items = client.search(params).unwrap();
         let item = items.next().unwrap().unwrap();
         assert_eq!(Some("swissalti3d_2019_2600-1199".to_string()), item.id);

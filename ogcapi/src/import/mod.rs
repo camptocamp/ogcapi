@@ -48,17 +48,43 @@ pub(crate) async fn bulk_load_items(
     properties: &[Option<sqlx::types::Json<serde_json::Map<String, serde_json::Value>>>],
     geoms: &[Vec<u8>],
     connection: &sqlx::PgPool,
-) -> Result<sqlx::postgres::PgQueryResult, sqlx::Error> {
-    sqlx::query(&format!(
-        r#"
-        INSERT INTO items."{}" (id, properties, geom)
-        SELECT * FROM UNNEST($1::text[], $2::jsonb[], $3::bytea[])
-        "#,
-        collection
-    ))
-    .bind(ids)
-    .bind(properties)
-    .bind(geoms)
-    .execute(connection)
-    .await
+) -> Result<(), sqlx::Error> {
+    let batch_size = 10000;
+    let total = geoms.len();
+
+    let mut start = 0;
+    let mut end = start + batch_size;
+
+    let mut ids_batch;
+    let mut properties_batch;
+    let mut geoms_batch;
+
+    while start < total {
+        if end < total {
+            ids_batch = &ids[start..end];
+            properties_batch = &properties[start..end];
+            geoms_batch = &geoms[start..end];
+        } else {
+            ids_batch = &ids[start..];
+            properties_batch = &properties[start..];
+            geoms_batch = &geoms[start..];
+        }
+        sqlx::query(&format!(
+            r#"
+            INSERT INTO items."{}" (id, properties, geom)
+            SELECT * FROM UNNEST($1::text[], $2::jsonb[], $3::bytea[])
+            "#,
+            collection
+        ))
+        .bind(ids_batch)
+        .bind(properties_batch)
+        .bind(geoms_batch)
+        .execute(connection)
+        .await?;
+
+        start = end;
+        end += batch_size;
+    }
+
+    Ok(())
 }

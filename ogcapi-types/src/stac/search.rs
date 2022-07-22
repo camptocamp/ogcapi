@@ -1,8 +1,8 @@
 use geojson::Geometry;
 use serde::{Deserialize, Serialize};
-use serde_with::{serde_as, DisplayFromStr};
+use serde_with::{formats::CommaSeparator, serde_as, DisplayFromStr, StringWithSeparator};
 
-use crate::common::{Bbox, Datetime, ListParam};
+use crate::common::{Bbox, Datetime};
 
 /// Search parameters for searching a SpatioTemporal Asset Catalog.
 #[serde_as]
@@ -20,11 +20,11 @@ pub struct SearchParams {
     #[serde_as(as = "Option<DisplayFromStr>")]
     pub intersects: Option<Geometry>,
     #[serde(default)]
-    #[serde_as(as = "Option<DisplayFromStr>")]
-    pub ids: Option<ListParam>,
+    #[serde_as(as = "Option<StringWithSeparator::<CommaSeparator, String>>")]
+    pub ids: Option<Vec<String>>,
     #[serde(default)]
-    #[serde_as(as = "Option<DisplayFromStr>")]
-    pub collections: Option<ListParam>,
+    #[serde_as(as = "Option<StringWithSeparator::<CommaSeparator, String>>")]
+    pub collections: Option<Vec<String>>,
 }
 
 impl SearchParams {
@@ -64,14 +64,22 @@ impl SearchParams {
     }
 
     /// Set the `ids` property
-    pub fn with_ids(mut self, ids: impl Into<ListParam>) -> Self {
-        self.ids = Some(ids.into());
+    pub fn with_ids<S, I>(mut self, ids: I) -> Self
+    where
+        S: std::fmt::Display,
+        I: IntoIterator<Item = S>,
+    {
+        self.ids = Some(ids.into_iter().map(|i| i.to_string()).collect());
         self
     }
 
     /// Set the `collections` property
-    pub fn with_collections(mut self, collections: impl Into<ListParam>) -> Self {
-        self.collections = Some(collections.into());
+    pub fn with_collections<S, I>(mut self, collections: I) -> Self
+    where
+        S: std::fmt::Display,
+        I: IntoIterator<Item = S>,
+    {
+        self.collections = Some(collections.into_iter().map(|c| c.to_string()).collect());
         self
     }
 }
@@ -88,8 +96,10 @@ pub struct SearchBody {
     pub datetime: Option<Datetime>,
     #[serde(default)]
     pub intersects: Option<Geometry>,
-    pub ids: Option<ListParam>,
-    pub collections: Option<ListParam>,
+    #[serde(default)]
+    pub ids: Option<Vec<String>>,
+    #[serde(default)]
+    pub collections: Option<Vec<String>>,
 }
 
 impl From<SearchBody> for SearchParams {

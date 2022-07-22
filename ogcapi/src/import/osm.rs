@@ -31,8 +31,6 @@ pub async fn load(args: Args) -> Result<(), anyhow::Error> {
     tracing::info!("Found {} blobs!", blob_count);
     pbf.rewind()?;
 
-    // let mut pb = pbr::ProgressBar::new((blobs * 1000).try_into()?);
-
     // Cache
     let objs = pbf.get_objs_and_deps(|_| true)?;
     tracing::info!("Found {} obj and dependencies!", objs.len());
@@ -84,7 +82,6 @@ pub async fn load(args: Args) -> Result<(), anyhow::Error> {
     }
 
     tx.commit().await?;
-    // pb.inc();
 
     Ok(())
 }

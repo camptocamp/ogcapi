@@ -18,4 +18,5 @@ pub struct Query {
     pub datetime: Option<Datetime>,
     pub limit: Option<isize>,
     pub offset: Option<isize>,
+    pub f: Option<String>,
 }

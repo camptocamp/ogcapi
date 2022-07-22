@@ -24,21 +24,22 @@ services:
       APP_HOST: ${APP_HOST}
       APP_PORT: ${APP_PORT}
       DATABASE_URL: postgresql://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}
-      SQLX_OFFLINE: "true"
       AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
       AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
       AWS_REGION: ${AWS_REGION}
       AWS_CUSTOM_ENDPOINT: http://minio:9000
       AWS_S3_BUCKET_NAME: ${AWS_S3_BUCKET_NAME}
     volumes:
-      - ./ogcapi:/app/ogcapi:ro
+      - ./ogcapi/src:/app/ogcapi/src:ro
+      - ./ogcapi/Cargo.toml:/app/ogcapi/Cargo.toml:ro
+      - ./ogcapi-client/src:/app/ogcapi-client/src:ro
+      - ./ogcapi-client/Cargo.toml:/app/ogcapi-client/Cargo.toml:ro
       - ./ogcapi-drivers/src:/app/ogcapi-drivers/src:ro
       - ./ogcapi-drivers/Cargo.toml:/app/ogcapi-drivers/Cargo.toml:ro
       - ./ogcapi-drivers/migrations:/app/ogcapi-drivers/migrations:ro
       - ./ogcapi-services/src:/app/ogcapi-services/src:ro
       - ./ogcapi-services/Cargo.toml:/app/ogcapi-services/Cargo.toml:ro
       - ./ogcapi-types:/app/ogcapi-types:ro
-      - ./sqlx-data.json:/app/sqlx-data.json:ro
     depends_on:
       db:
         condition: service_healthy

@@ -92,6 +92,8 @@ async fn read(
         .mediatype(GEO_JSON)]);
     }
 
+    collection.links.resolve_relative_links();
+
     Ok(Json(collection))
 }
 
@@ -142,18 +144,16 @@ async fn collections(
                 ITEMS,
             )
             .mediatype(GEO_JSON),
-            // Link::new(
-            //     &url.join(&format!("collections/{}/location", collection.id))?,
-            //     DATA,
-            // )
-            // .title("EDR location query endpoint"),
         ]);
+
+        collection.links.resolve_relative_links()
     }
 
     collections.links = vec![
         Link::new(&url, SELF).mediatype(JSON).title("this document"),
         Link::new(&url.join(".")?, ROOT).mediatype(JSON),
     ];
+
     collections.crs = vec![Crs::default(), Crs::from_epsg(3857)];
 
     Ok(Json(collections))

@@ -10,7 +10,6 @@ mod landing_page;
 mod link;
 pub mod link_rel;
 mod links;
-mod list_param;
 pub mod media_type;
 mod query;
 
@@ -25,5 +24,4 @@ pub use extent::*;
 pub use landing_page::LandingPage;
 pub use link::Link;
 pub use links::{Linked, Links};
-pub use list_param::ListParam;
 pub use query::Query;
