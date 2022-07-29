@@ -1,4 +1,5 @@
 use clap::Parser;
+use tracing_subscriber::prelude::*;
 
 #[derive(Parser, Debug)]
 #[clap(name = "ogcapi", version, about = "CLI for the `ogcapi` project.")]
@@ -13,7 +14,7 @@ pub enum Command {
     #[cfg(feature = "import")]
     Import(ogcapi::import::Args),
     /// Start the ogcapi services
-    #[cfg(feature = "serve")]
+    #[cfg(feature = "services")]
     Serve(ogcapi_services::Config),
 }
 
@@ -23,7 +24,10 @@ async fn main() -> anyhow::Result<()> {
     dotenv::dotenv().ok();
 
     // setup tracing
-    ogcapi_services::telemetry::init();
+    tracing_subscriber::registry()
+        .with(tracing_subscriber::EnvFilter::from_default_env())
+        .with(tracing_subscriber::fmt::layer().pretty())
+        .init();
 
     // parse cli args
     let app = App::parse();
@@ -43,7 +47,7 @@ async fn main() -> anyhow::Result<()> {
                 }
             }
         }
-        #[cfg(feature = "serve")]
+        #[cfg(feature = "services")]
         Command::Serve(config) => {
             // Application state
             let state = ogcapi_services::State::new_from(&config)

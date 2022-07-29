@@ -1,7 +1,7 @@
 use std::{fs, path::Path, str::FromStr};
 
 #[doc(hidden)]
-pub static OPENAPI: &[u8; 29696] = include_bytes!("../openapi.yaml");
+pub static OPENAPI: &[u8; 29696] = include_bytes!("../assets/openapi/openapi.yaml");
 
 #[derive(Default, Clone)]
 pub struct OpenAPI(pub openapiv3::OpenAPI);

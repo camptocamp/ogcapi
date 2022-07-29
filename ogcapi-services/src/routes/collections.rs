@@ -76,13 +76,23 @@ async fn read(
         Link::new(&url.join("..")?, ROOT).mediatype(JSON),
     ]);
 
+    #[cfg(not(feature = "stac"))]
+    collection.links.insert_or_update(&[Link::new(
+        &url.join(&format!("{}/items", collection.id))?,
+        ITEMS,
+    )
+    .mediatype(GEO_JSON)]);
+
+    #[cfg(feature = "stac")]
     if collection.r#type == "Collection" {
-        collection.links.insert_or_update(&[
-            Link::new(&url.join(&format!("{}/items", collection.id))?, ITEMS).mediatype(GEO_JSON),
-            // Link::new(&url.join(&format!("{}/location", collection.id))?, DATA)
-            //     .title("EDR location query endpoint"),
-        ]);
+        collection.links.insert_or_update(&[Link::new(
+            &url.join(&format!("{}/items", collection.id))?,
+            ITEMS,
+        )
+        .mediatype(GEO_JSON)]);
     }
+
+    collection.links.resolve_relative_links();
 
     Ok(Json(collection))
 }
@@ -134,18 +144,16 @@ async fn collections(
                 ITEMS,
             )
             .mediatype(GEO_JSON),
-            // Link::new(
-            //     &url.join(&format!("collections/{}/location", collection.id))?,
-            //     DATA,
-            // )
-            // .title("EDR location query endpoint"),
         ]);
+
+        collection.links.resolve_relative_links()
     }
 
     collections.links = vec![
         Link::new(&url, SELF).mediatype(JSON).title("this document"),
         Link::new(&url.join(".")?, ROOT).mediatype(JSON),
     ];
+
     collections.crs = vec![Crs::default(), Crs::from_epsg(3857)];
 
     Ok(Json(collections))

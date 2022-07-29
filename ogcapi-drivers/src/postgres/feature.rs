@@ -7,6 +7,41 @@ use crate::{CollectionTransactions, FeatureTransactions};
 
 use super::Db;
 
+#[cfg(not(feature = "stac"))]
+static ROWS: &str = "
+items.id,
+items.collection,
+properties,
+ST_AsGeoJSON(ST_Transform(geom, $1))::jsonb AS geometry,
+links,
+";
+
+#[cfg(feature = "stac")]
+static ROWS: &str = "
+items.id,
+items.collection,
+properties,
+ST_AsGeoJSON(ST_Transform(geom, $1))::jsonb AS geometry,
+links,
+meta.collection ->> 'stac_version' AS stac_version,
+COALESCE(
+    (meta.collection -> 'stac_extensions'),
+    '[]'::jsonb
+) AS stac_extensions,
+assets,
+COALESCE(
+    bbox,
+    array_to_json(
+        ARRAY[
+            st_xmin(st_transform(geom, 4326)::box2d),
+            st_ymin(st_transform(geom, 4326)::box2d),
+            st_xmax(st_transform(geom, 4326)::box2d),
+            st_ymax(st_transform(geom, 4326)::box2d)
+        ]
+    )::jsonb
+) as bbox
+";
+
 #[async_trait::async_trait]
 impl FeatureTransactions for Db {
     async fn create_feature(&self, feature: &Feature) -> anyhow::Result<String> {
@@ -50,22 +85,15 @@ impl FeatureTransactions for Db {
             r#"
             SELECT row_to_json(t)
             FROM (
-                SELECT
-                    id,
-                    '{0}' AS collection,
-                    properties,
-                    ST_AsGeoJSON(ST_Transform(geom, $2::int))::jsonb as geometry,
-                    links,
-                    assets,
-                    bbox
-                FROM items."{0}"
-                WHERE id = $1
+                SELECT {ROWS}
+                FROM items."{collection}" items JOIN meta.collections meta
+                    ON items.collection = meta.id
+                WHERE items.id = $2
             ) t
-            "#,
-            collection
+            "#
         ))
-        .bind(id)
         .bind(crs.as_srid())
+        .bind(id)
         .fetch_optional(&self.pool)
         .await?;
 
@@ -80,8 +108,7 @@ impl FeatureTransactions for Db {
                 properties = $1 -> 'properties',
                 geom = ST_GeomFromGeoJSON($1 -> 'geometry'),
                 links = $1 -> 'links',
-                assets = COALESCE($1 -> 'assets', '{{}}'::jsonb),
-                bbox = $1 -> 'bbox'
+                assets = COALESCE($1 -> 'assets', '{{}}'::jsonb)
             WHERE id = $1 ->> 'id'
             "#,
             &feature.collection.as_ref().unwrap()
@@ -224,15 +251,9 @@ impl FeatureTransactions for Db {
             r#"
             SELECT array_to_json(array_agg(row_to_json(t)))
             FROM (
-                SELECT
-                    id,
-                    '{collection}' as collection,
-                    properties,
-                    ST_AsGeoJSON(ST_Transform(geom, $1))::jsonb as geometry,
-                    links,
-                    assets,
-                    bbox
-                FROM items."{collection}"
+                SELECT {ROWS}
+                FROM items."{collection}" items JOIN meta.collections meta
+                    ON items.collection = meta.id
                 WHERE {conditions}
                 LIMIT {}
                 OFFSET {}

@@ -1,3 +1,4 @@
 target
 .env
 docker-compose.yml
+ogcapi.qgz

@@ -1,7 +1,9 @@
 [package]
 name = "ogcapi-types"
 version = "0.1.0"
+description = "Types as defined by various OGC API Standards."
 license = "MIT OR Apache-2.0"
+repository = "https://github.com/camptocamp/ogcapi"
 edition = "2021"
 
 [features]
@@ -12,8 +14,8 @@ stac = []
 [dependencies]
 chrono = { version = "0.4.19", features = ["serde"] }
 geojson = "0.23.0"
-serde = "1.0.138"
+serde = "1.0.140"
 serde_json = "1.0.82"
 serde_repr = "0.1.8"
-serde_with = { version = "1.14.0", features = ["json"] }
+serde_with = { version = "2.0.0", features = ["json"] }
 url = "2.2.2"

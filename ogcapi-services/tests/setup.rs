@@ -5,6 +5,7 @@ use uuid::Uuid;
 
 use ogcapi_services::{Config, ConfigParser};
 
+#[allow(dead_code)]
 pub async fn spawn_app() -> anyhow::Result<(SocketAddr, Url)> {
     dotenv::dotenv().ok();
 

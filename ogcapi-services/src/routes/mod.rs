@@ -17,8 +17,10 @@ use std::sync::Arc;
 
 use axum::{extract::Extension, Json};
 
+#[cfg(feature = "stac")]
+use ogcapi_types::common::link_rel::SEARCH;
 use ogcapi_types::common::{
-    link_rel::{CONFORMANCE, ROOT, SEARCH, SELF, SERVICE_DESC, SERVICE_DOC},
+    link_rel::{CONFORMANCE, ROOT, SELF, SERVICE_DESC, SERVICE_DOC},
     media_type::{HTML, JSON, OPEN_API_JSON},
     Conformance, LandingPage, Link, Linked,
 };

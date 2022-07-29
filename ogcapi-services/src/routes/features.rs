@@ -76,6 +76,7 @@ async fn read(
         Link::new(&url.join("../../..")?, ROOT).mediatype(JSON),
         Link::new(&url.join(&format!("../../{}", collection_id))?, COLLECTION).mediatype(JSON),
     ]);
+    feature.links.resolve_relative_links();
 
     let mut headers = HeaderMap::new();
     headers.insert(

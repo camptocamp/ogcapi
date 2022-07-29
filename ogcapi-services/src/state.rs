@@ -1,4 +1,6 @@
-use std::{collections::BTreeMap, sync::RwLock};
+#[cfg(feature = "processes")]
+use std::collections::BTreeMap;
+use std::sync::RwLock;
 
 #[cfg(feature = "edr")]
 use ogcapi_drivers::EdrQuerier;
@@ -14,7 +16,9 @@ use ogcapi_drivers::TileTransactions;
 use ogcapi_drivers::{postgres::Db, CollectionTransactions};
 use ogcapi_types::common::{Conformance, LandingPage};
 
-use crate::{openapi::OPENAPI, Config, ConfigParser, OpenAPI, Processor};
+#[cfg(feature = "processes")]
+use crate::Processor;
+use crate::{openapi::OPENAPI, Config, ConfigParser, OpenAPI};
 
 /// Application state
 pub struct State {
@@ -64,6 +68,7 @@ impl State {
 
     pub async fn new_with(db: Db, openapi: OpenAPI) -> Self {
         // conformance
+        #[allow(unused_mut)]
         let mut conformace = Conformance::default();
         #[cfg(feature = "stac")]
         conformace.extend(&[
@@ -71,6 +76,7 @@ impl State {
             "https://api.stacspec.org/v1.0.0-rc.1/item-search",
             "https://api.stacspec.org/v1.0.0-rc.1/collections",
             "https://api.stacspec.org/v1.0.0-rc.1/ogcapi-features",
+            "https://api.stacspec.org/v1.0.0-rc.1/browseable",
         ]);
 
         // drivers

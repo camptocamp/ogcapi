@@ -114,6 +114,11 @@ pub async fn load(mut args: Args) -> Result<(), anyhow::Error> {
                     None
                 }
                 1 => Some(("POINT", 2)),
+                2 => Some(("LINESTRING", 2)),
+                3 => Some(("POLYGON", 2)),
+                4 => Some(("MULTIPOINT", 2)),
+                5 => Some(("MULTILINESTRING", 2)),
+                6 => Some(("MULTIPOLYGON", 2)),
                 2147483653 => Some(("MULTILINESTRINGZ", 3)),
                 2147483654 => Some(("MULTIPOLYGONZ", 3)),
                 i => {

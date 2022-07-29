@@ -1,4 +1,4 @@
-# OGC API
+# `ogcapi`
 
 [OGC API](https://ogcapi.ogc.org/) building blocks implemented in [Rust](https://www.rust-lang.org/)
 
@@ -40,9 +40,6 @@ cargo install sqlx-cli --no-default-features --features postgres,rustls
 # Run services
 docker compose up db minio minio-mc -d
 
-# Setup the database
-sqlx database setup --source ogcapi-drivers/migrations
-
 # Import administrative bounaries
 cargo run -- import --input data/ne_110m_admin_0_countries.geojson --collection countries
 
@@ -52,7 +49,7 @@ cargo run -- serve
 # Run tests
 cargo test --workspace --all-features
 
-# Documentation
+# Open Documentation
 cargo doc --workspace --all-features --no-deps --open
 ```
 
@@ -63,14 +60,7 @@ cargo doc --workspace --all-features --no-deps --open
 cargo fmt
 
 # Clippy
-cargo clippy --all-features
-```
-
-### Prepared statements
-
-```bash
-# Prepare statements for sqlx offline
-cargo sqlx prepare -- -p ogcapi-drivers --all-features
+cargo clippy --workspace --all-features --tests
 ```
 
 ### Teamengine

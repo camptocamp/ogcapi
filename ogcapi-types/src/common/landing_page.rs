@@ -59,6 +59,7 @@ pub struct LandingPage {
     pub additional_properties: Map<String, Value>,
 }
 
+#[allow(clippy::derivable_impls)]
 impl Default for LandingPage {
     fn default() -> Self {
         Self {
